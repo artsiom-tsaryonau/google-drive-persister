@@ -1,0 +1,81 @@
+#!/bin/bash
+# Example usage of the Google Drive API Wrapper endpoints
+
+BASE_URL="http://localhost:8000"
+SESSION_COOKIE="session=your_session_cookie_here"  # Replace with your actual session cookie value
+PARENT_ID="1xa0a3Z4YUfDZ3FQS4LrpdOZEkVp8hrq7"  # Parent id from wrapper_api.md
+SAMPLE_DOCUMENT_ID="1a-28yTY23NuCa7vmyMABGgRDCErW58Q99F_2o9ZePGo"  # Sample document id from wrapper_api.md
+
+echo "=== Google Drive API Examples ==="
+echo
+
+# Search Google Drive objects by name (optionally filter by mimeType)
+echo "1. Search Google Drive objects by name:"
+curl -b "$SESSION_COOKIE" "$BASE_URL/drive/search?name=Sample&mimeType="
+echo -e "\n---"
+
+# List Google Drive content in a specific path (optionally filter by mimeType)
+echo "2. List Google Drive content in a specific path:"
+curl -b "$SESSION_COOKIE" "$BASE_URL/drive/navigate/folder1/folder2?mimeType="
+echo -e "\n---"
+
+# List all comments for a file
+echo "3. List all comments for a file:"
+curl -b "$SESSION_COOKIE" "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment"
+echo -e "\n---"
+
+# Get a specific comment by ID (replace COMMENT_ID with actual comment ID)
+echo "4. Get a specific comment by ID:"
+curl -b "$SESSION_COOKIE" "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment/COMMENT_ID"
+echo -e "\n---"
+
+# Add an anchored comment to specific text (Google Docs)
+echo "5. Add an anchored comment to specific text (Google Docs):"
+curl -b "$SESSION_COOKIE" -X POST "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "This is a comment on specific text",
+    "anchor": {
+      "startIndex": 10,
+      "endIndex": 20
+    }
+  }'
+echo -e "\n---"
+
+# Add an anchored comment to a cell (Google Sheets)
+echo "6. Add an anchored comment to a cell (Google Sheets):"
+curl -b "$SESSION_COOKIE" -X POST "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "This is a comment on a specific cell",
+    "anchor": {
+      "sheetId": "sheet_id_123",
+      "rowIndex": 5,
+      "columnIndex": 3
+    }
+  }'
+echo -e "\n---"
+
+# Add a reply to a comment (replace COMMENT_ID with actual comment ID from previous response)
+echo "7. Add a reply to a comment:"
+curl -b "$SESSION_COOKIE" -X POST "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment/COMMENT_ID/reply" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "This is a reply to the comment"}'
+echo -e "\n---"
+
+# Resolve a comment (replace COMMENT_ID with actual comment ID)
+echo "8. Resolve a comment:"
+curl -b "$SESSION_COOKIE" -X POST "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment/COMMENT_ID/resolve"
+echo -e "\n---"
+
+# Delete a comment (replace COMMENT_ID with actual comment ID)
+echo "9. Delete a comment:"
+curl -b "$SESSION_COOKIE" -X DELETE "$BASE_URL/drive/$SAMPLE_DOCUMENT_ID/comment/COMMENT_ID"
+echo -e "\n---"
+
+# Delete an object by ID
+echo "10. Delete an object by ID:"
+curl -b "$SESSION_COOKIE" -X DELETE "$BASE_URL/drive/your_file_or_folder_id_here"
+echo -e "\n---"
+
+echo "=== All examples completed ==="

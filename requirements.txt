@@ -1,0 +1,9 @@
+fastapi
+google-api-python-client
+google-auth-oauthlib
+itsdangerous
+pydantic-settings
+python-dotenv
+requests
+starlette
+uvicorn
