@@ -2,13 +2,14 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from api.documents.models import Document
 from google_services import get_docs_service, get_drive_service
 
 router = APIRouter()
 
 
 # POST /drive/documents?parent=&title=: Create new empty document, with optional parent id parameter
-@router.post("/drive/documents")
+@router.post("/drive/documents", response_model=Document)
 async def create_document(
     parent: Optional[str] = Query(None, description="Optional parent folder id"),
     title: str = Query(..., description="Document title"),
@@ -27,22 +28,23 @@ async def create_document(
     """
     try:
         # Create the document
-        document = docs_service.documents().create(body={"title": title}).execute()
+        document_data = docs_service.documents().create(body={"title": title}).execute()
 
         # If parent is specified, move the document to that folder
         if parent:
-            file_id = document["documentId"]
+            file_id = document_data["documentId"]
             drive_service.files().update(
                 fileId=file_id, addParents=parent, fields="id, name, parents"
             ).execute()
 
-        return document
+        # Convert to Document model
+        return Document(**document_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 # GET /drive/documents/{document_id}: Return a specific document by id
-@router.get("/drive/documents/{document_id}")
+@router.get("/drive/documents/{document_id}", response_model=Document)
 async def get_document(document_id: str, docs_service=Depends(get_docs_service)):
     """
     Get a document by its ID.
@@ -54,8 +56,9 @@ async def get_document(document_id: str, docs_service=Depends(get_docs_service))
         docs_service.documents().get(documentId=document_id)
     """
     try:
-        document = docs_service.documents().get(documentId=document_id).execute()
-        return document
+        document_data = docs_service.documents().get(documentId=document_id).execute()
+        # Convert to Document model
+        return Document(**document_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
